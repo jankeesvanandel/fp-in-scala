@@ -1,53 +1,97 @@
 package fp_in_scala.chapter_03
 
 import scala.annotation.tailrec
+import scala.collection.immutable
 
-/**
- * Created by jankeesvanandel on 31/08/15.
- */
 object ListUtils {
-
-  def tail[A](l: List[A]): Either[String, List[A]] = l match {
-    case Nil => Left("Tail of an empty list!")
-    case _ :: tail => Right(tail)
-  }
-
-  def setHead[A](l: List[A], newHead: A): Either[String, List[A]] = l match {
-    case Nil => Left("Head of an empty list!")
-    case head :: tail => Right(newHead :: tail)
-  }
-
-  def drop[A](l: List[A], n: Int): List[A] = l match {
-    case _ :: tail if n > 0 => drop(tail, n-1)
-    case _ => l
-  }
-
-  def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {
-    case head :: tail if f(head) => dropWhile(tail, f)
-    case _ => l
-  }
-
-  def init[A](l: List[A]): List[A] = l match {
+  def setHead[A](as: List[A])(newHead: A): List[A] = as match {
     case Nil => Nil
-    case _ :: Nil => Nil
-    case head :: tail => head :: init(tail)
+    case Cons(head, tail) => Cons(newHead, tail)
   }
 
-  def foldRight[A, B](as: List[A], startValue: B)(f: (A, B) => B): B =
-    as match {
-      case Nil => startValue
-      case head :: tail => f(head, foldRight(tail, startValue)(f))
+  implicit def fromScala[A](scalaList: scala.List[A]): List[A] = {
+    @tailrec
+    def doFromScala(acc: List[A], scalaList: scala.List[A]): List[A] = {
+      scalaList match {
+        case immutable.Nil => acc
+        case head :: tail => doFromScala(Cons(head, acc), tail)
+      }
     }
-
-  def lengthUsingFoldRight[A](as: List[A]) =
-    ListUtils.foldRight(as, 0)((_, b: Int) => b+1)
-
-  @tailrec
-  def foldLeft[A, B](as: List[A], startValue: B)(f: (B, A) => B): B = {
-    as match {
-      case Nil => startValue
-      case head :: tail => foldLeft(tail, f(startValue, head))(f)
-    }
+    doFromScala(Nil, scalaList.reverse)
   }
 
+
+  implicit def toScala[A](ownList: List[A]): scala.List[A] = {
+    @tailrec
+    def doToScala(acc: scala.List[A], ownList: List[A]): scala.List[A] = {
+      ownList match {
+        case Nil => acc
+        case Cons(head, tail) => doToScala(head :: acc, tail)
+      }
+    }
+    doToScala(scala.List.empty, ownList).reverse
+  }
+
+  def sumUsingFoldLeft(numbers: List[Int]): Int = numbers.foldLeft(0)(_ + _)
+
+  def productUsingFoldLeft(numbers: List[Int]): Int = numbers.foldLeft(1)(_ * _)
+
+  def lengthUsingFoldLeft[A](numbers: List[A]): Int = numbers.foldLeft(0)((b, a) => b+1)
+  def reverseUsingFoldLeft[A](list: List[A]): List[A] = list.foldLeft(Nil:List[A])((b: List[A], a: A) => Cons(a, b))
+
+  def foldRightUsingFoldLeft[A, B](list: List[A], acc: B)(f: (A, B) => B): B = {
+    reverseUsingFoldLeft(list).foldLeft(acc)((acc: B, a: A) => f(a, acc))
+  }
+
+  def foldLeftUsingFoldRight[A, B](list: List[A], acc: B)(f: (B, A) => B): B = {
+    list.foldRight(acc)((a: A, acc: B) => f(acc, a))
+  }
+
+  def appendUsingFoldLeft[A](list: List[A], other: List[A]): List[A] = {
+    reverseUsingFoldLeft(list).foldLeft(other)((b, a) => Cons(a, b))
+  }
+
+  def appendUsingFoldRight[A](list: List[A], other: List[A]): List[A] = {
+    foldRightUsingFoldLeft(list, other)((a, b) => Cons(a, b))
+  }
+
+  def concatenateListOfLists[A](list: List[List[A]]): List[A] = {
+    val concatenated = list.foldLeft(Nil: List[A]) {
+      (acc: List[A], a: List[A]) =>
+        a.foldLeft(acc)((b, a) => Cons(a, b))
+    }
+    reverseUsingFoldLeft(concatenated)
+  }
+
+  def addTwoIntLists(list: List[Int], other: List[Int]): List[Int] = {
+    @tailrec
+    def doAddTwoLists(acc: List[Int], list: List[Int], other: List[Int]): List[Int] = list match {
+      case Cons(head1, cons1) => other match {
+        case Cons(head2, cons2) =>
+          doAddTwoLists(Cons(head1 + head2, acc), cons1, cons2)
+        case Nil =>
+          sys.error("Lists not of the same size")
+      }
+      case Nil if other.isEmpty => acc
+      case Nil => sys.error("Lists not of the same size")
+    }
+    ListUtils.reverseUsingFoldLeft(doAddTwoLists(Nil, list, other))
+  }
+
+  def hasSubsequence[A](list: List[A], subsequence: List[A]): Boolean = {
+    def startsWithSubsequence(list: List[A], subsequence: List[A]): Boolean = list match {
+      case Nil => subsequence.isEmpty
+      case Cons(head, tail) if subsequence.isEmpty => true
+      case Cons(head, tail) if head != subsequence.head => false
+      case Cons(head, tail) => startsWithSubsequence(tail, subsequence.tail)
+    }
+    if (subsequence.isEmpty) true
+    else {
+      list match {
+        case Nil => false
+        case Cons(head, tail) if startsWithSubsequence(list, subsequence) => true
+        case Cons(head, tail) => hasSubsequence(tail, subsequence) // Continue with next
+      }
+    }
+  }
 }

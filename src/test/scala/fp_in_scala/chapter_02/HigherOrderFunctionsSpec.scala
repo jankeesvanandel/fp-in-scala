@@ -2,9 +2,6 @@ package fp_in_scala.chapter_02
 
 import org.scalatest.{Matchers, FlatSpec}
 
-/**
- * Created by jankeesvanandel on 31/08/15.
- */
 class HigherOrderFunctionsSpec extends FlatSpec with Matchers {
 
   // Types for making the intent of the function types clearer

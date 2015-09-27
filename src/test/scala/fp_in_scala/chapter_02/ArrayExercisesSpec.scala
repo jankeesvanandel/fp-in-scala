@@ -2,9 +2,6 @@ package fp_in_scala.chapter_02
 
 import org.scalatest.{Matchers, FlatSpec}
 
-/**
- * Created by jankeesvanandel on 31/08/15.
- */
 class ArrayExercisesSpec extends FlatSpec with Matchers {
 
   val intSortFn = (a: Int, b: Int) => b > a

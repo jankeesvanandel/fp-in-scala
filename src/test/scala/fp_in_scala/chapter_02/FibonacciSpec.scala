@@ -2,9 +2,6 @@ package fp_in_scala.chapter_02
 
 import org.scalatest.{Matchers, FlatSpec}
 
-/**
- * Created by jankeesvanandel on 31/08/15.
- */
 class FibonacciSpec extends FlatSpec with Matchers {
 
   it should "error if given a value lower than 0" in {

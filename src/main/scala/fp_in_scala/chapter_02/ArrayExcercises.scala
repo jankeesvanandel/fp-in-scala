@@ -2,9 +2,6 @@ package fp_in_scala.chapter_02
 
 import scala.annotation.tailrec
 
-/**
- * Created by jankeesvanandel on 31/08/15.
- */
 object ArrayExcercises {
 
   def isSorted[A](as: Array[A], ordered: (A, A) => Boolean): Boolean = {
