@@ -78,7 +78,9 @@ object ListUtils {
     ListUtils.reverseUsingFoldLeft(doAddTwoLists(Nil, list, other))
   }
 
+  @tailrec
   def hasSubsequence[A](list: List[A], subsequence: List[A]): Boolean = {
+    @tailrec
     def startsWithSubsequence(list: List[A], subsequence: List[A]): Boolean = list match {
       case Nil => subsequence.isEmpty
       case Cons(head, tail) if subsequence.isEmpty => true
