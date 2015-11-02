@@ -59,6 +59,4 @@ object Tree {
   def mapWithFold[A, B](tree: Tree[A])(fn: (A) => B): Tree[B] = {
     tree.fold(a => Leaf(fn(a)): Tree[B])((l, r) => Branch(l, r))
   }
-
-  private def identity[A](a: A): A = a
 }
