@@ -24,13 +24,23 @@ sealed trait Option[+A] {
     if (this.map(fn).getOrElse(false)) this
     else None
 
+  def isEmpty: Boolean
+  def nonEmpty: Boolean
 }
 
-case class Some[+A](get: A) extends Option[A]
+case class Some[+A](get: A) extends Option[A] {
+  override def isEmpty: Boolean = false
+  override def nonEmpty: Boolean = true
+}
 
-case object None extends Option[Nothing]
+case object None extends Option[Nothing] {
+  override def isEmpty: Boolean = true
+  override def nonEmpty: Boolean = false
+}
 
 object Option {
+
+  def empty[A]: Option[A] = None
 
   def mean(xs: Seq[Double]): Option[Double] = {
     if (xs.isEmpty) None
